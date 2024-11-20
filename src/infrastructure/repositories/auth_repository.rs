@@ -1,4 +1,5 @@
 use crate::core::entities::auth::Auth;
+use crate::utils::log_query;
 use diesel::prelude::*;
 use diesel::result::Error;
 
@@ -12,7 +13,8 @@ impl AuthRepository {
         auth: &Auth,
     ) -> Result<usize, Error> {
         use crate::infrastructure::schema::schema::auths::dsl::*;
-        diesel::insert_into(auths).values(auth).execute(conn)
+        let query = diesel::insert_into(auths).values(auth);
+        log_query(query, || query.execute(conn))
     }
 
     #[allow(dead_code)]
@@ -22,10 +24,9 @@ impl AuthRepository {
         username_query: &str,
     ) -> Result<Option<Auth>, Error> {
         use crate::infrastructure::schema::schema::auths::dsl::*;
-        let result = auths
-            .filter(username.eq(username_query))
-            .first::<Auth>(conn)
-            .optional();
+        let query = auths.filter(username.eq(username_query));
+        let result = log_query(query, || query.first::<Auth>(conn).optional());
+
         result
     }
 }

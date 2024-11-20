@@ -2,6 +2,7 @@ use crate::infrastructure::repositories::auth_repository::AuthRepository;
 use crate::infrastructure::repositories::user_repository::UserRepository;
 use crate::services::user_service::UserService;
 
+use crate::utils::create_response;
 use crate::{
     core::commands::register_user::RegisterUserCommand, infrastructure::db::connection::DbPool,
 };
@@ -13,6 +14,7 @@ pub async fn register_user_handler(
     payload: web::Json<RegisterUserCommand>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
+    //let conn = get_logged_connection(&pool);
     let conn = pool.get().map_err(|_| {
         InternalError::new(
             "Failed to get DB connection",     // Custom error message
@@ -30,7 +32,25 @@ pub async fn register_user_handler(
     };
 
     match user_service.register_user(payload.into_inner()) {
-        Ok(user) => Ok(HttpResponse::Created().json(user)),
-        Err(e) => Ok(HttpResponse::BadRequest().json(e)),
+        Ok(user) => {
+            let response = create_response(
+                "User registered successfully",
+                StatusCode::CREATED.as_u16(),
+                Some(user),
+                None,
+                None,
+            );
+            Ok(HttpResponse::Created().json(response))
+        }
+        Err(e) => {
+            let response = create_response(
+                "API Error",
+                StatusCode::BAD_REQUEST.as_u16(),
+                Some("null"),
+                None,
+                Some(e),
+            );
+            Ok(HttpResponse::BadRequest().json(response))
+        }
     }
 }

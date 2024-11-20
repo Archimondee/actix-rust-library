@@ -16,6 +16,7 @@ pub struct UserService {
     pub auth_repo: AuthRepository,
     pub user_repo: UserRepository,
     pub conn: PooledConnection<diesel::r2d2::ConnectionManager<SqliteConnection>>,
+    //pub conn: LoggedConnection,
 }
 
 impl UserService {
@@ -27,6 +28,13 @@ impl UserService {
                 if let Some(_) = self.auth_repo.find_by_username(txn_conn, &cmd.username)? {
                     return Err(ApiError {
                         message: "Username already exists".to_string(),
+                        error: None,
+                    });
+                }
+
+                if let Some(_) = self.user_repo.find_by_email(txn_conn, &cmd.email)? {
+                    return Err(ApiError {
+                        message: "Email already exists".to_string(),
                         error: None,
                     });
                 }
