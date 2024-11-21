@@ -2,7 +2,9 @@ use crate::infrastructure::repositories::auth_repository::AuthRepository;
 use crate::infrastructure::repositories::user_repository::UserRepository;
 use crate::services::user_service::UserService;
 
-use crate::utils::create_response;
+use crate::utils::errors::ApiError;
+use crate::utils::response::ApiResponse;
+use crate::utils::{create_response, format_validation_errors};
 use crate::{
     core::commands::register_user::RegisterUserCommand, infrastructure::db::connection::DbPool,
 };
@@ -10,11 +12,31 @@ use actix_web::error::InternalError;
 use actix_web::http::StatusCode;
 use actix_web::{web, Error, HttpResponse};
 
+use validator::Validate;
+
 pub async fn register_user_handler(
     payload: web::Json<RegisterUserCommand>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    //let conn = get_logged_connection(&pool);
+    match payload.validate() {
+        Ok(()) => (),
+        Err(e) => {
+            let error = ApiError {
+                message: "Validation Error".to_owned(),
+                error: Some(format_validation_errors(&e)),
+            };
+            let response: ApiResponse<()> = create_response(
+                "Validation Error",
+                StatusCode::UNPROCESSABLE_ENTITY.as_u16(),
+                None,
+                None,
+                Some(error),
+            );
+
+            return Ok(HttpResponse::UnprocessableEntity().json(response));
+        }
+    }
+
     let conn = pool.get().map_err(|_| {
         InternalError::new(
             "Failed to get DB connection",     // Custom error message

@@ -14,10 +14,8 @@ where
     T: QueryFragment<Sqlite>,
     F: FnOnce() -> QueryResult<U>,
 {
-    // Log the SQL query string
     let sql = format!("{}", debug_query::<Sqlite, _>(&query));
 
-    // Measure execution time
     let start = Instant::now();
     let result = execute_fn();
     let duration = start.elapsed();

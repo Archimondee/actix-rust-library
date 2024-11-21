@@ -1,11 +1,12 @@
 use diesel::result::Error as DieselError;
 use serde::Serialize;
+use serde_json::Value;
 use std::fmt;
 
 #[derive(Debug, Serialize)]
 pub struct ApiError {
     pub message: String,
-    pub error: Option<serde_json::Value>, // Dynamic details
+    pub error: Option<Value>, // Dynamic details
 }
 
 impl fmt::Display for ApiError {
