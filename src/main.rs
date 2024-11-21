@@ -32,9 +32,9 @@ async fn main() -> std::io::Result<()> {
 
     info!("Application is starting up...");
     let governor_conf = GovernorConfigBuilder::default()
-        .requests_per_minute(60)
-        .period(Duration::from_secs(60))
-        .burst_size(20)
+        .requests_per_minute(500)
+        .period(Duration::from_secs(10))
+        .burst_size(50)
         .finish()
         .unwrap();
     let pool = establish_connection();

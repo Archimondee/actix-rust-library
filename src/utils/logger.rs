@@ -1,6 +1,5 @@
 use actix_web::middleware::Logger;
 use diesel::query_builder::QueryFragment;
-
 use diesel::sqlite::Sqlite;
 use diesel::{debug_query, QueryResult};
 use log::info;
@@ -17,7 +16,6 @@ where
 {
     // Log the SQL query string
     let sql = format!("{}", debug_query::<Sqlite, _>(&query));
-    info!("SQL Query: {}", sql);
 
     // Measure execution time
     let start = Instant::now();
@@ -27,8 +25,14 @@ where
     let duration_ms = duration.as_micros() as f64 / 1000.0;
 
     match &result {
-        Ok(_) => info!("Query executed successfully in {:.2}ms", duration_ms),
-        Err(err) => info!("Query failed: {:?}, Duration: {:.2}", err, duration_ms),
+        Ok(_) => info!(
+            "Query executed successfully in {:.2}ms -> {:?}",
+            duration_ms, sql
+        ),
+        Err(err) => info!(
+            "Query failed: {:?}, Duration: {:.2} -> {:?}",
+            err, duration_ms, sql
+        ),
     }
 
     result

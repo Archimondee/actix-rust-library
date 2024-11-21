@@ -2,6 +2,7 @@ use diesel::r2d2::{self, ConnectionManager};
 use diesel::SqliteConnection;
 use dotenv::dotenv;
 use std::env;
+use std::time::Duration;
 
 pub type DbPool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
 
@@ -15,6 +16,10 @@ pub fn establish_connection() -> DbPool {
     let manager = ConnectionManager::<SqliteConnection>::new(database_url);
 
     r2d2::Pool::builder()
+        .connection_timeout(Duration::from_secs(30))
+        .min_idle(Some(5))
+        .max_size(30)
+        .idle_timeout(Some(Duration::from_secs(300)))
         .build(manager)
         .expect("Failed to create connection pool.")
 }
