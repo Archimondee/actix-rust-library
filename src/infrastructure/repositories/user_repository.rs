@@ -29,4 +29,16 @@ impl UserRepository {
 
         result
     }
+
+    pub fn find_by_auth_id(
+        &mut self,
+        conn: &mut SqliteConnection,
+        auth_id_query: &str,
+    ) -> Result<Option<User>, Error> {
+        use crate::infrastructure::schema::schema::users::dsl::*;
+        let query = users.filter(auth_id.eq(auth_id_query));
+        let result = log_query(query, || query.first::<User>(conn).optional());
+
+        result
+    }
 }

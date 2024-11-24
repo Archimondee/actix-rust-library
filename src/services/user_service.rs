@@ -1,9 +1,11 @@
-use bcrypt::{hash, DEFAULT_COST};
+use bcrypt::{hash, verify, DEFAULT_COST};
 use diesel::{Connection, SqliteConnection};
 use r2d2::PooledConnection;
 
+use crate::core::queries::login_queries::{Login, LoginQueries, Token, UserInfo};
 use crate::infrastructure::repositories::auth_repository::AuthRepository;
 use crate::infrastructure::repositories::user_repository::UserRepository;
+use crate::utils::jwt::create_jwt;
 use crate::{
     core::{
         commands::register_user::RegisterUserCommand,
@@ -50,5 +52,59 @@ impl UserService {
                 Ok(user)
             })
             .map_err(|e| e.into())
+    }
+
+    #[allow(dead_code)]
+    pub fn login_user(&mut self, queries: LoginQueries) -> Result<Login, ApiError> {
+        self.conn.transaction(|txn_conn| {
+            if let Some(auth) = self
+                .auth_repo
+                .find_by_username(txn_conn, &queries.username)?
+            {
+                if verify(&queries.password, &auth.password).unwrap_or(false) {
+                    if let Some(user) = self.user_repo.find_by_auth_id(txn_conn, &auth.id)? {
+                        let jwt_token = Token {
+                            id: auth.id.clone(),
+                            username: auth.username.clone(),
+                            created_at: auth.created_at.clone(),
+                            user_id: user.id.clone(),
+                            lastname: user.lastname.clone(),
+                            firstname: user.firstname.clone(),
+                            email: user.email.clone(),
+                        };
+                        let secret = "SECRET_JWT_CODE";
+                        let token = create_jwt(&jwt_token, &secret);
+                        let login = Login {
+                            id: auth.id,
+                            token,
+                            username: auth.username,
+                            created_at: auth.created_at,
+                            user_info: UserInfo {
+                                id: user.id,
+                                lastname: user.lastname,
+                                firstname: user.firstname,
+                                email: user.email,
+                            },
+                        };
+                        Ok(login)
+                    } else {
+                        return Err(ApiError {
+                            message: "Wrong username or password".to_string(),
+                            error: None,
+                        });
+                    }
+                } else {
+                    return Err(ApiError {
+                        message: "Wrong username or password".to_string(),
+                        error: None,
+                    });
+                }
+            } else {
+                return Err(ApiError {
+                    message: "Wrong username or password".to_string(),
+                    error: None,
+                });
+            }
+        })
     }
 }

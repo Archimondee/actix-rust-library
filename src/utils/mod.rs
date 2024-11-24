@@ -1,5 +1,6 @@
 pub mod cors;
 pub mod errors;
+pub mod jwt;
 pub mod logger;
 pub mod not_found;
 pub mod response;
