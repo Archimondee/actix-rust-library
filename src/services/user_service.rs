@@ -1,3 +1,5 @@
+use std::env;
+
 use bcrypt::{hash, verify, DEFAULT_COST};
 use diesel::{Connection, SqliteConnection};
 use r2d2::PooledConnection;
@@ -72,8 +74,7 @@ impl UserService {
                             firstname: user.firstname.clone(),
                             email: user.email.clone(),
                         };
-                        let secret = "SECRET_JWT_CODE";
-                        let token = create_jwt(&jwt_token, &secret);
+                        let token = create_jwt(&jwt_token, &env::var("SECRET_KEY").unwrap());
                         let login = Login {
                             id: auth.id,
                             token,
