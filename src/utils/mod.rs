@@ -1,6 +1,8 @@
+pub mod auth_middleware;
 pub mod cors;
 pub mod errors;
 pub mod jwt;
+pub mod jwt_guard;
 pub mod logger;
 pub mod not_found;
 pub mod response;

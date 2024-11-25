@@ -15,6 +15,7 @@ use actix_web::{
 };
 use handlers::{
     auth_handlers::configure_auth_handlers, health_handlers::configure_health_handlers,
+    user_handlers::configure_user_handler,
 };
 use infrastructure::db::establish_connection;
 
@@ -47,12 +48,14 @@ async fn main() -> std::io::Result<()> {
             .app_data(JsonConfig::default().limit(4096 * 1024))
             .wrap(Governor::new(&governor_conf))
             .service(
-                web::scope("/v1")
+                web::scope("api/v1")
                     .configure(configure_health_handlers)
-                    .configure(configure_auth_handlers),
+                    .configure(configure_auth_handlers)
+                    .configure(configure_user_handler),
             )
             .default_service(web::route().to(utils::not_found))
     })
+    .workers(8)
     .bind("127.0.0.1:5100")?
     .run()
     .await

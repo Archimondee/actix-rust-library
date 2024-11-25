@@ -1,10 +1,7 @@
 use std::env;
 
-use bcrypt::{hash, verify, DEFAULT_COST};
-use diesel::{Connection, SqliteConnection};
-use r2d2::PooledConnection;
-
 use crate::core::queries::login_queries::{Login, LoginQueries, Token, UserInfo};
+use crate::core::queries::user_queries::UserQueries;
 use crate::infrastructure::repositories::auth_repository::AuthRepository;
 use crate::infrastructure::repositories::user_repository::UserRepository;
 use crate::utils::jwt::create_jwt;
@@ -15,12 +12,14 @@ use crate::{
     },
     utils::errors::ApiError,
 };
+use bcrypt::{hash, verify, DEFAULT_COST};
+use diesel::{Connection, SqliteConnection};
+use r2d2::PooledConnection;
 
 pub struct UserService {
     pub auth_repo: AuthRepository,
     pub user_repo: UserRepository,
     pub conn: PooledConnection<diesel::r2d2::ConnectionManager<SqliteConnection>>,
-    //pub conn: LoggedConnection,
 }
 
 impl UserService {
@@ -103,6 +102,20 @@ impl UserService {
             } else {
                 return Err(ApiError {
                     message: "Wrong username or password".to_string(),
+                    error: None,
+                });
+            }
+        })
+    }
+
+    #[allow(dead_code)]
+    pub fn user_info(&mut self, id: &str) -> Result<UserQueries, ApiError> {
+        self.conn.transaction(|txn_conn| {
+            if let Some(user_queries) = self.auth_repo.find_by_user_id(txn_conn, id)? {
+                Ok(user_queries)
+            } else {
+                return Err(ApiError {
+                    message: "User Not Found".to_string(),
                     error: None,
                 });
             }

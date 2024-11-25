@@ -1,12 +1,14 @@
 use chrono::NaiveDateTime;
 use chrono::Utc;
+use diesel::prelude::QueryableByName;
+use diesel::Selectable;
 use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::infrastructure::schema::schema::auths;
 
-#[derive(Debug, Queryable, Insertable, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Insertable, Serialize, Deserialize, Selectable, QueryableByName)]
 #[diesel(table_name = auths)]
 pub struct Auth {
     pub id: String,

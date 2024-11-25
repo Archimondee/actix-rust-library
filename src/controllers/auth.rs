@@ -2,7 +2,6 @@ use crate::core::queries::login_queries::LoginQueries;
 use crate::infrastructure::repositories::auth_repository::AuthRepository;
 use crate::infrastructure::repositories::user_repository::UserRepository;
 use crate::services::user_service::UserService;
-
 use crate::utils::errors::ApiError;
 use crate::utils::response::ApiResponse;
 use crate::utils::{create_response, format_validation_errors};
