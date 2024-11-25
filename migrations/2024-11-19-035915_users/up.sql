@@ -6,5 +6,5 @@ CREATE TABLE users (
     lastname TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (auth_id) REFERENCES auth (id)
+    FOREIGN KEY (auth_id) REFERENCES auths (id)
 );
