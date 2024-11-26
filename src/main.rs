@@ -14,8 +14,8 @@ use actix_web::{
     App, HttpServer,
 };
 use handlers::{
-    auth_handlers::configure_auth_handlers, health_handlers::configure_health_handlers,
-    user_handlers::configure_user_handler,
+    auth_handlers::configure_auth_handlers, category_handlers::configure_category_handlers,
+    health_handlers::configure_health_handlers, user_handlers::configure_user_handler,
 };
 use infrastructure::db::establish_connection;
 
@@ -51,7 +51,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("api/v1")
                     .configure(configure_health_handlers)
                     .configure(configure_auth_handlers)
-                    .configure(configure_user_handler),
+                    .configure(configure_user_handler)
+                    .configure(configure_category_handlers),
             )
             .default_service(web::route().to(utils::not_found))
     })

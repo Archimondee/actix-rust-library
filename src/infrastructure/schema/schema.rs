@@ -21,8 +21,8 @@ diesel::table! {
 diesel::table! {
     book_favorites (id) {
         id -> Text,
-        book_id -> Binary,
-        user_id -> Binary,
+        book_id -> Text,
+        user_id -> Text,
         created_at -> Timestamp,
     }
 }
