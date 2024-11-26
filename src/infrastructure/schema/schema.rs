@@ -19,6 +19,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    book_favorites (id) {
+        id -> Text,
+        book_id -> Binary,
+        user_id -> Binary,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     book_transaction_logs (id) {
         id -> Text,
         book_transaction_id -> Text,
@@ -75,6 +84,8 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(book_favorites -> books (book_id));
+diesel::joinable!(book_favorites -> users (user_id));
 diesel::joinable!(book_transactions -> books (book_id));
 diesel::joinable!(book_transactions -> users (user_id));
 diesel::joinable!(books -> authors (author_id));
@@ -84,6 +95,7 @@ diesel::joinable!(users -> auths (auth_id));
 diesel::allow_tables_to_appear_in_same_query!(
     authors,
     auths,
+    book_favorites,
     book_transaction_logs,
     book_transactions,
     books,
